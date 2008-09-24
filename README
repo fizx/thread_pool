@@ -1,0 +1,9 @@
+A simple executor-style ThreadPool for Ruby (with tests, yay!)
+
+Usage:
+
+	require "rubygems"
+	require "thread_pool"
+	pool = ThreadPool.new(threads = 10)
+	pool.execute { puts "I'm writing from a thread" }
+	pool.join
