@@ -7,11 +7,12 @@ class ThreadPool
     def initialize(queue, mutex)
       @thread = Thread.new do
         loop do
-          mutex.synchronize { @block = queue.shift }
-          if @block
+          mutex.synchronize { @tuple = queue.shift }
+          if @tuple
+            args, block = @tuple
             @active = true
-            @block.call
-            @block.complete = true
+            block.call(*args)
+            block.complete = true
           else
             @active = false
             sleep 0.01
@@ -38,7 +39,7 @@ class ThreadPool
   end
   
   # Runs the block at some time in the near future
-  def execute(&block)
+  def execute(*args, &block)
     init_completable(block)
     
     if @queue_limit > 0
@@ -46,13 +47,13 @@ class ThreadPool
     end
       
     @mutex.synchronize do
-      @queue << block
+      @queue << [args, block]
     end
   end
   
   # Runs the block at some time in the near future, and blocks until complete  
-  def synchronous_execute(&block)
-    execute(&block)
+  def synchronous_execute(*args, &block)
+    execute(*args, &block)
     sleep 0.01 until block.complete?
   end
   

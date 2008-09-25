@@ -30,6 +30,31 @@ class TestThreadPool < Test::Unit::TestCase
     assert_equal n - THREADS, @pool.waiting
   end
   
+  class A
+    def initialize(i)
+      @i = i
+    end
+    attr_reader :i
+  end
+  
+  def test_context
+    @foo = []
+    @bar = (0...5).to_a
+    while c = @bar.shift
+      @pool.execute { @foo << c }
+    end
+    @pool.join
+    assert_equal [nil] * 5, @foo
+    
+    @foo = []
+    @bar = (0...5).to_a
+    while c = @bar.shift
+      @pool.execute(c) {|n| @foo << n }
+    end
+    @pool.join
+    assert_equal (0...5).to_a, @foo
+  end
+  
   def test_queue_limit
     n = 50
     @foo = 0

@@ -7,3 +7,21 @@ Usage:
 	pool = ThreadPool.new(threads = 10)
 	pool.execute { puts "I'm writing from a thread" }
 	pool.join
+	
+It's often useful to make sure that the properties of Ruby's blocks don't bite you.  The following code will usually print three nils, because n keeps changing.
+
+	pool = ThreadPool.new(threads = 10)
+	numbers = [1, 2, 3]
+	while n = numbers.shift
+		pool.execute { puts n.inspect }
+	end
+	pool.join
+	
+Passing arguments to execute avoids this. i.e.:
+
+	pool = ThreadPool.new(threads = 10)
+	numbers = [1, 2, 3]
+	while n = numbers.shift
+		pool.execute(n) {|local| puts local.inspect }
+	end
+	pool.join
