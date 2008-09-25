@@ -1,3 +1,5 @@
+0.2.1
+- mutex in case Array#<< and Array#shift aren't atomic
 0.2.0
 - synchronous_execute
 - queue_limit

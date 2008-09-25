@@ -1,15 +1,17 @@
 # Hooray 
+require "thread"
 class ThreadPool
   class Executor
     attr_reader :active
     
-    def initialize(queue)
+    def initialize(queue, mutex)
       @thread = Thread.new do
         loop do
-          if block = queue.shift
+          mutex.synchronize { @block = queue.shift }
+          if @block
             @active = true
-            block.call
-            block.complete = true
+            @block.call
+            @block.complete = true
           else
             @active = false
             sleep 0.01
@@ -27,20 +29,25 @@ class ThreadPool
   
   # Initialize with number of threads to run
   def initialize(count, queue_limit = 0)
+    @mutex = Mutex.new
     @executors = []
     @queue = []
     @queue_limit = queue_limit
     @count = count    
-    count.times { @executors << Executor.new(@queue) }
+    count.times { @executors << Executor.new(@queue, @mutex) }
   end
   
   # Runs the block at some time in the near future
   def execute(&block)
     init_completable(block)
+    
     if @queue_limit > 0
       sleep 0.01 until @queue.size < @queue_limit
     end
-    @queue << block
+      
+    @mutex.synchronize do
+      @queue << block
+    end
   end
   
   # Runs the block at some time in the near future, and blocks until complete  
