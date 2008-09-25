@@ -30,6 +30,24 @@ class TestThreadPool < Test::Unit::TestCase
     assert_equal n - THREADS, @pool.waiting
   end
   
+  def test_queue_limit
+    n = 50
+    @foo = 0
+    @pool.queue_limit = 1
+    begin
+      Timeout::timeout(0.2) do
+        n.times {
+          @pool.execute {  sleep 1 }
+          @foo += 1
+        }
+      end 
+    rescue Timeout::Error
+      assert_equal @pool.queue_limit + @pool.size, @foo
+    else
+      assert false
+    end
+  end
+  
   def test_execution
     Timeout::timeout(1) do
       n = 50
@@ -39,6 +57,18 @@ class TestThreadPool < Test::Unit::TestCase
       }
       @pool.join
       assert_equal n, @foo.length
+    end
+  end
+  
+  def test_synchronous_execute
+    Timeout::timeout(1) do
+      @foo = false
+      @pool.execute { sleep 0.01; @foo = true }
+      assert !@foo
+    
+      @foo = false
+      @pool.synchronous_execute { sleep 0.01; @foo = true }
+      assert @foo
     end
   end
 end

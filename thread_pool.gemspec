@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = "thread_pool"
-  s.version  = "0.1.0"
+  s.version  = "0.2.0"
   s.date     = "2008-09-24"
   s.summary  = "A ruby thread pool"
   s.email    = "kyle@kylemaxwell.com"
