@@ -1,3 +1,5 @@
+0.3.1
+- rescue Thread errors, use Loggable to print backtraces
 0.3.0
 - allow execute to take args, so we can reset the scope
 0.2.1
